@@ -1,4 +1,13 @@
 {
+    "license": "MIT",
+    "name": "vendi-advertising/vendi-starter-theme",
+    "description": "Backup tool for Vendi's internal development servers",
+    "authors": [
+        {
+            "name": "Chris Haas",
+            "email": "chris@vendiadvertising.com"
+        }
+    ],
     "require": {
         "symfony/console": "^4.3",
         "symfony/finder": "^4.3"
