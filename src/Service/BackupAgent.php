@@ -4,6 +4,7 @@ namespace Vendi\InternalTools\DevServerBackup\Service;
 
 use Archive_Tar;
 use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\WebApplicationInterface;
+use Webmozart\PathUtil\Path;
 
 class BackupAgent
 {
@@ -56,12 +57,12 @@ class BackupAgent
                     $dumper = new WordPressDatabaseDumper($app);
                     $dumper->dump_database();
 
-                    $tmp_name = $dumper->get_backup_filename() . '.tgz';
-                    if(is_file($tmp_name)){
-                        unlink($tmp_name);
+                    $backup_file_name = Path::join('/data/backups/mysql/v2/', basename($dumper->get_backup_filename()) . '.tgz');
+                    if(is_file($backup_file_name)){
+                        unlink($backup_file_name);
                     }
 
-                    $tar_object_compressed = new Archive_Tar($tmp_name, 'gz');
+                    $tar_object_compressed = new Archive_Tar($backup_file_name, 'gz');
                     if(!$tar_object_compressed->create($dumper->get_backup_filename())){
                         throw new \Exception('Unable to make archive for some reason');
                     }
