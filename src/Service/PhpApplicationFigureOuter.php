@@ -79,7 +79,7 @@ class PhpApplicationFigureOuter
     protected function look_for_html_only_site() : ?GeneralWebApplicationWithoutDatabase
     {
         if(mb_strpos($this->nginxSite->get_folder_abs_path(), 'html') > 0 ){
-            return new GeneralWebApplicationWithoutDatabase($this->nginxSite);
+            return new GeneralWebApplicationWithoutDatabase($this->nginxSite, true);
         }
 
         return null;

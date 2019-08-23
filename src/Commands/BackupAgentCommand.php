@@ -27,6 +27,17 @@ class BackupAgentCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
+        if(!function_exists('posix_getuid')){
+            $io->error( 'This command is only intended to be run on Linux machines.' );
+            exit;
+        }
+
+        $is_root = ( 0 === posix_getuid() );
+        if( ! $is_root ) {
+            $io->error( 'The backup command must be run with higher privileges.' );
+            exit;
+        }
+
         $ba = new BackupAgent();
         $ba->run();
     }

@@ -95,13 +95,13 @@ class GeneralWebApplicationWithDatabase extends WebApplicationBase
         return 'General Web Application With Database';
     }
 
-    public function has_database(): bool
+    final public function has_database(): bool
     {
         return true;
     }
 
-    public function dump_database(): string
+    final public function exclude_from_backup(): bool
     {
-        throw new \Exception('Method not implemented');
+        return false;
     }
 }

@@ -2,19 +2,33 @@
 
 namespace Vendi\InternalTools\DevServerBackup\Entity\WebApplications;
 
+use Vendi\InternalTools\DevServerBackup\Entity\NginxSite;
+
 class GeneralWebApplicationWithoutDatabase extends WebApplicationBase
-{    public function get_application_type(): string
+{
+    /**
+     * @var bool
+     */
+    private $exclude_from_backup;
+
+    public function __construct(NginxSite $nginxSite, bool $exclude_from_backup = false)
+    {
+        parent::__construct($nginxSite);
+        $this->exclude_from_backup = $exclude_from_backup;
+    }
+
+    public function get_application_type(): string
     {
         return 'General Web Application Without Database';
     }
 
-    public function has_database(): bool
+    final public function has_database(): bool
     {
         return false;
     }
 
-    public function dump_database(): string
+    public function exclude_from_backup(): bool
     {
-        throw new \Exception('This type of application does not support database dumping');
+        return $this->exclude_from_backup;
     }
 }

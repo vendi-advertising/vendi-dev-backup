@@ -10,5 +10,5 @@ interface WebApplicationInterface
 
     public function has_database() : bool;
 
-    public function dump_database() : string;
+    public function exclude_from_backup() : bool;
 }

@@ -2,6 +2,7 @@
 
 namespace Vendi\InternalTools\DevServerBackup\Service;
 
+use Composer\Package\Archiver\PharArchiver;
 use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\WebApplicationInterface;
 
 class BackupAgent
@@ -57,6 +58,7 @@ class BackupAgent
                     break;
             }
         }
+
     }
 
     public function run()
