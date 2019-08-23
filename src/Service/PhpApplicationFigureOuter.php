@@ -45,8 +45,9 @@ class PhpApplicationFigureOuter
                 }
             }
 
-//            dump($file);
         }
+
+        dump($this->nginxSite);
 
         return new GeneralWebApplicationWithoutDatabase($this->nginxSite);
     }

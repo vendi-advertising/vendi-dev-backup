@@ -48,7 +48,7 @@ class NginxSitesCommand extends CommandBase
 
         foreach($sites as $site){
             $h = new PhpApplicationFigureOuter($site);
-            dump($h->get_application()->get_application_type());
+            $h->get_application();
         }
 //
 //        $rows = [];
