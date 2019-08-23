@@ -2,7 +2,7 @@
 
 namespace Vendi\InternalTools\DevServerBackup\Service;
 
-use Composer\Package\Archiver\PharArchiver;
+use Archive_Tar;
 use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\WebApplicationInterface;
 
 class BackupAgent
@@ -46,6 +46,7 @@ class BackupAgent
     protected function dump_databases()
     {
         foreach($this->getApplications() as $app) {
+
             if(!$app->has_database()){
                 continue;
             }
@@ -54,6 +55,15 @@ class BackupAgent
                 case WebApplicationInterface::KNOWN_APPLICATION_TYPE_WORDPRESS:
                     $dumper = new WordPressDatabaseDumper($app);
                     $dumper->dump_database();
+
+                    $tmp_name = '/tmp/backup.sql.tgz';
+                    if(is_file($tmp_name)){
+                        unlink($tmp_name);
+                    }
+
+                    $tar_object_compressed = new Archive_Tar($tmp_name, 'gz');
+                    $tar_object_compressed->create($dumper->get_backup_filename());
+
                     exit;
                     break;
             }
