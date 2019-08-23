@@ -28,7 +28,7 @@ class PhpApplicationFigureOuter
             return new WordPressApplication($this->nginxSite);
         }
 
-        $composer_files = $finder->depth('== 0')->files()->in($this->nginxSite->get_folder_abs_path())->name('composer.json');
+        $composer_files = $finder->depth('== 0')->files()->in(dirname($this->nginxSite->get_folder_abs_path()))->name('composer.json');
         if($composer_files->hasResults()) {
             $files = iterator_to_array($composer_files);
             $file = reset($files);
