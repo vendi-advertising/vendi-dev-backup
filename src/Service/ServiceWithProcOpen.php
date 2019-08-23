@@ -4,6 +4,11 @@ namespace Vendi\InternalTools\DevServerBackup\Service;
 
 abstract class ServiceWithProcOpen
 {
+    protected function create_tmp_file() : string
+    {
+        return \tempnam(\sys_get_temp_dir(), 'VENDI_BACKUP');
+    }
+
     protected function run_command($properly_escaped_command, &$command_outputs = null) : bool
     {
         $descriptorspec = [
