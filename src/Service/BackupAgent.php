@@ -57,7 +57,7 @@ class BackupAgent
                     $dumper = new WordPressDatabaseDumper($app);
                     $dumper->dump_database();
 
-                    $backup_file_name = Path::join('/data/backups/mysql/v2/', basename($dumper->get_backup_filename()) . '.tgz');
+                    $backup_file_name = Path::join('/data/backups/mysql/v2/', $app->get_nginx_site()->get_project_name() . '.sql.tgz');
                     if(is_file($backup_file_name)){
                         unlink($backup_file_name);
                     }

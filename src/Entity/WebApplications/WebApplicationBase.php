@@ -38,4 +38,9 @@ abstract class WebApplicationBase implements WebApplicationInterface
     {
         $this->backups[$key] = $path;
     }
+
+    public function get_nginx_site() : NginxSite
+    {
+        return $this->getNginxSite();
+    }
 }

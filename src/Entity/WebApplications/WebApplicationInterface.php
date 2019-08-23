@@ -2,6 +2,8 @@
 
 namespace Vendi\InternalTools\DevServerBackup\Entity\WebApplications;
 
+use Vendi\InternalTools\DevServerBackup\Entity\NginxSite;
+
 interface WebApplicationInterface
 {
     public const KNOWN_APPLICATION_TYPE_WORDPRESS = 'WordPress';
@@ -15,4 +17,7 @@ interface WebApplicationInterface
     public function get_backups() : array;
 
     public function add_backup(string $key, string $path) : array;
+
+    public function get_nginx_site(): NginxSite;
+
 }
