@@ -26,11 +26,17 @@ class PhpApplicationFigureOuter
     public function get_application() : WebApplicationInterface
     {
 
-        return  $this->look_for_wordpress() ??
+        $ret = $this->look_for_wordpress() ??
             $this->look_for_drupal() ??
             $this->look_for_default_site() ??
-            $this->look_for_generic_env() ??
-            new GeneralWebApplicationWithoutDatabase($this->nginxSite);
+            $this->look_for_generic_env();
+
+        if(!$ret){
+            dump($this->nginxSite);
+            $ret = new GeneralWebApplicationWithoutDatabase($this->nginxSite);
+        }
+
+        return $ret;
     }
 
     protected function look_for_wordpress() : ?WordPressApplication
