@@ -47,13 +47,14 @@ class WordPressDatabaseDumper extends ServiceWithProcOpen
 
     public function dump_database() : bool
     {
-        $tmp_file = $this->create_tmp_file();
+        $tmp_file = $this->create_tmp_file() . 'sql';
         $command = sprintf(
             'wp db dump %2$s --path=%1$s --allow-root',
             escapeshellarg($this->getApplication()->getNginxSite()->get_folder_abs_path()),
             escapeshellarg($tmp_file)
         );
         dump($tmp_file);
+        dump($command);
         $this->run_command($command, $command_outputs);
 
         return $command_outputs['stdout'];

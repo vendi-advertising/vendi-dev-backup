@@ -53,6 +53,7 @@ class BackupAgent
                 case WebApplicationInterface::KNOWN_APPLICATION_TYPE_WORDPRESS:
                     $dumper = new WordPressDatabaseDumper($app);
                     $dumper->dump_database();
+                    exit;
                     break;
             }
         }
