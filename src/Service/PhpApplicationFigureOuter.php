@@ -36,7 +36,6 @@ class PhpApplicationFigureOuter
         ;
 
         if(!$ret){
-            dump($this->nginxSite);
             $ret = new GeneralWebApplicationWithoutDatabase($this->nginxSite);
         }
 

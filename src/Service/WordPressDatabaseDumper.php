@@ -42,7 +42,7 @@ class WordPressDatabaseDumper extends ServiceWithProcOpen
 
     public function __construct(WordPressApplication $application)
     {
-        $this->$application = $application;
+        $this->application = $application;
     }
 
     public function dump_database() : bool
