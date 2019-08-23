@@ -5,6 +5,7 @@ namespace Vendi\InternalTools\DevServerBackup\Commands;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Vendi\InternalTools\DevServerBackup\Service\NginxConfigDumper;
 use Vendi\InternalTools\DevServerBackup\Service\NginxSiteParser;
 use Vendi\InternalTools\DevServerBackup\Service\PhpApplicationFigureOuter;
 
@@ -38,10 +39,8 @@ class NginxSitesCommand extends CommandBase
             exit;
         }
 
-        $command_outputs = [];
-
-        $this->run_command('nginx -T', 'Could not get nginx config', false, $command_outputs);
-        $stdout = $command_outputs['stdout'];
+        $nginx_config_dumper = new NginxConfigDumper();
+        $stdout = $nginx_config_dumper->get_nginx_config();
 
         $parser = new NginxSiteParser();
         $sites = $parser->parse_nginx_output($stdout);
