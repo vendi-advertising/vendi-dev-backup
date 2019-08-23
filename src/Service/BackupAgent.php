@@ -83,9 +83,6 @@ class BackupAgent
                     }
 
                     $app->add_backup('DB', $backup_file_path_abs);
-
-                    exit;
-                    break;
             }
         }
 
