@@ -49,6 +49,8 @@ abstract class ServiceWithProcOpen
 
         //Non-zero exit code means error
         if( 0 !== $exit_code ) {
+            dump($properly_escaped_command);
+            dump($command_outputs);
             throw new \Exception('Process returned error code: ' . $exit_code);
         }
 
