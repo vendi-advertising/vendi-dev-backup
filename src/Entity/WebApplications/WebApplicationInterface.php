@@ -16,7 +16,7 @@ interface WebApplicationInterface
 
     public function get_backups() : array;
 
-    public function add_backup(string $key, string $path) : array;
+    public function add_backup(string $key, string $path);
 
     public function get_nginx_site(): NginxSite;
 
