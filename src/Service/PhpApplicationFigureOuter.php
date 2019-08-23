@@ -40,6 +40,7 @@ class PhpApplicationFigureOuter
 
             $json = \json_decode($file->getContents(), true, 512, $json_args);
             if(\JSON_ERROR_NONE === \json_last_error() ){
+                dump($json);
                 if(isset($json['require']['drupal/core'])){
                     return new DrupalApplication($this->nginxSite);
                 }
