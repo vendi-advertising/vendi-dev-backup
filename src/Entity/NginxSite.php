@@ -23,9 +23,4 @@ class NginxSite
     {
         return $this->folder_abs_path;
     }
-
-    public function __toString() : string
-    {
-        return sprintf('')
-    }
 }
