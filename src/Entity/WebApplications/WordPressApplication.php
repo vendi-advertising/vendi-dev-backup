@@ -2,7 +2,9 @@
 
 namespace Vendi\InternalTools\DevServerBackup\Entity\WebApplications;
 
-class WordPressApplication implements WebApplicationInterface
+use Vendi\InternalTools\DevServerBackup\Entity\NginxSite;
+
+class WordPressApplication extends WebApplicationBase
 {
     final public function get_application_type(): string
     {

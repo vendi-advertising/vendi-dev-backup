@@ -2,7 +2,7 @@
 
 namespace Vendi\InternalTools\DevServerBackup\Entity\WebApplications;
 
-class DrupalApplication implements WebApplicationInterface
+class DrupalApplication extends WebApplicationBase
 {
 
     public function get_application_type(): string

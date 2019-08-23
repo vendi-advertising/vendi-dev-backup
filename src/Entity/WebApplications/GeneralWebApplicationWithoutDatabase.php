@@ -2,7 +2,7 @@
 
 namespace Vendi\InternalTools\DevServerBackup\Entity\WebApplications;
 
-class GeneralWebApplicationWithoutDatabase implements WebApplicationInterface
+class GeneralWebApplicationWithoutDatabase extends WebApplicationBase
 {
 
     public function get_application_type(): string
