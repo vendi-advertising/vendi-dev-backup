@@ -8,7 +8,7 @@ class WordPressApplication extends WebApplicationBase
 {
     final public function get_application_type(): string
     {
-        return 'WordPress';
+        return WebApplicationInterface::KNOWN_APPLICATION_TYPE_WORDPRESS;
     }
 
     public function has_database(): bool
