@@ -3,9 +3,9 @@
 namespace Vendi\InternalTools\DevServerBackup\Commands;
 
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Vendi\InternalTools\DevServerBackup\Service\NginxSiteParser;
 
 class NginxSitesCommand extends CommandBase
 {
@@ -26,9 +26,14 @@ class NginxSitesCommand extends CommandBase
     {
         $this->set_io(new SymfonyStyle($input, $output));
 
+        if(!function_exists('posix_getuid')){
+            $this->get_io()->error( 'This command is only intended to be run on Linux machines.' );
+            exit;
+        }
+
         $is_root = ( 0 === posix_getuid() );
         if( ! $is_root ) {
-            $io->error( 'The backup command must be run with higher privileges.' );
+            $this->get_io()->error( 'The backup command must be run with higher privileges.' );
             exit;
         }
 
@@ -37,40 +42,12 @@ class NginxSitesCommand extends CommandBase
         $this->run_command('nginx -T', 'Could not get nginx config', false, $command_outputs);
         $stdout = $command_outputs['stdout'];
 
-        preg_match_all('/^server\s*\{.*?^\}/ms', $stdout, $server_blocks);
+        $parser = new NginxSiteParser();
+        $sites = $parser->parse_nginx_output($stdout);
 
-        //Grab the first item from the array
-        $server_blocks = reset($server_blocks);
+        $this->get_io()->table(['Projects', 'Folders'], $sites);
 
-        foreach($server_blocks as $server_block) {
-            if(!preg_match('/root\s+(?<folder>[^;]+);/', $server_block, $matches)){
-                continue;
-            }
-            if(!array_key_exists('folder', $matches)){
-                continue;
-            }
-
-            $folder_abs_path = $matches['folder'];
-            $folder_parts = explode('/', $folder_abs_path);
-
-            //Ignore the first three items in the path
-            //TODO: This should be smarter
-            array_shift($folder_parts);
-            array_shift($folder_parts);
-            array_shift($folder_parts);
-            $project_name = array_shift($folder_parts);
-
-            dump([
-                'project_name' => $project_name,
-                'folder_abs_path' => $folder_abs_path,
-            ]);
-
-            // dump();
-        }
-
-        // dump($stdout);
-        // dump($matches);
-        // if(!$)
+//        dump($sites);
 
     }
 }
