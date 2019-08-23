@@ -10,6 +10,7 @@ use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\GeneralWebApplica
 use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\GeneralWebApplicationWithoutDatabase;
 use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\WebApplicationInterface;
 use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\WordPressApplication;
+use Webmozart\PathUtil\Path;
 
 class PhpApplicationFigureOuter
 {
@@ -92,6 +93,81 @@ class PhpApplicationFigureOuter
         return null;
     }
 
+    protected function set_property_by_key(GeneralWebApplicationWithDatabase $obj, $key, $value)
+    {
+        switch($key){
+            case 'host':
+                $obj->setDbHost($value);
+                break;
+
+            case 'name':
+                $obj->setDbName($value);
+                break;
+
+            case 'user':
+                $obj->setDbUser($value);
+                break;
+
+            case 'pass':
+                $obj->setDbPass($value);
+                break;
+
+            case 'port':
+                $obj->setDbPort($value);
+                break;
+
+            default:
+                throw new \Exception('The known formats array is not setup correctly.');
+        }
+    }
+
+    protected function look_for_magic_in_files() : ?GeneralWebApplicationWithDatabase
+    {
+        $known_files = [
+            '../includes/constants.php' => [
+                'host' => null,
+                'name' => "/^\s*define\(\s*'VENDI_DB_NAME',\s*'(?<VALUE>[^']+)'\s*\);/m",
+                'user' => "/^\s*define\(\s*'VENDI_DB_USER',\s*'(?<VALUE>[^']+)'\s*\);/m",
+                'pass' => "/^\s*define\(\s*'VENDI_DB_PASS',\s*'(?<VALUE>[^']+)'\s*\);/m",
+                'port' => null,
+            ],
+        ];
+
+        foreach($known_files as $rel_path => $keys){
+            $abs_path = Path::canonicalize($this->nginxSite->get_folder_abs_path(), $rel_path);
+            dump($abs_path);
+            if(!is_file($abs_path)){
+                continue;
+            }
+
+            $contents = file_get_contents($abs_path);
+
+            $is_valid = true;
+            $potential = new GeneralWebApplicationWithDatabase($this->nginxSite);
+
+            foreach($keys as $key => $value) {
+                if(!$value){
+                    continue;
+                }
+
+                if(!preg_match($value, $contents, $matches)){
+                    continue;
+                }
+
+                $actual_value = $matches['VALUE'];
+
+                $this->set_property_by_key($potential, $key, $actual_value);
+            }
+
+            if($is_valid){
+                dump('THis worked!');
+                return $potential;
+            }
+        }
+
+        return null;
+    }
+
     protected function look_for_generic_env() : ?GeneralWebApplicationWithDatabase
     {
         /*
@@ -134,8 +210,6 @@ class PhpApplicationFigureOuter
         if($env_files->hasResults()) {
             foreach($env_files as $file){
 
-                dump($file->getPathname());
-
                 $backup = $_ENV;
                 foreach($_ENV as $key => $value){
                     unset($_ENV[$key]);
@@ -166,30 +240,7 @@ class PhpApplicationFigureOuter
                             break;
                         }
 
-                        switch($key){
-                            case 'host':
-                                $potential->setDbHost($_ENV[$value]);
-                                break;
-
-                            case 'name':
-                                $potential->setDbName($_ENV[$value]);
-                                break;
-
-                            case 'user':
-                                $potential->setDbUser($_ENV[$value]);
-                                break;
-
-                            case 'pass':
-                                $potential->setDbPass($_ENV[$value]);
-                                break;
-
-                            case 'port':
-                                $potential->setDbPort($_ENV[$value]);
-                                break;
-
-                            default:
-                                throw new \Exception('The known formats array is not setup correctly.');
-                        }
+                        $this->set_property_by_key($potential, $key, $_ENV[$value]);
                     }
 
                     if($is_valid){
