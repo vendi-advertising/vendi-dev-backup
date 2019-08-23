@@ -28,6 +28,7 @@ class PhpApplicationFigureOuter
 
         return  $this->look_for_wordpress() ??
             $this->look_for_drupal() ??
+            $this->look_for_default_site() ??
             $this->look_for_generic_env() ??
             new GeneralWebApplicationWithoutDatabase($this->nginxSite);
     }
@@ -66,8 +67,31 @@ class PhpApplicationFigureOuter
         return null;
     }
 
+    protected function look_for_default_site() : ?GeneralWebApplicationWithoutDatabase
+    {
+        if('html' === $this->nginxSite->get_project_name()){
+            return new GeneralWebApplicationWithoutDatabase($this->nginxSite);
+        }
+
+        return null;
+    }
+
     protected function look_for_generic_env() : ?GeneralWebApplicationWithDatabase
     {
+        /*
+
+         */
+        /**
+         * This is a collection of known .env format. All five keys are required (although not enforce below)
+         * and should be set to null if it isn't supported by that .env file. Generally that should only ever
+         * by the port but we'll cross that road later.
+         *
+         * Below is a sample configuration:
+         * DB_HOST=127.0.0.1
+         * DB_DATABASE=snipeit
+         * DB_USERNAME=snipeit
+         * DB_PASSWORD=snipeit
+         */
         $known_formats = [
             [
                 'host' => 'DB_HOST',
@@ -77,17 +101,13 @@ class PhpApplicationFigureOuter
                 'port' => null,
             ],
         ];
-        /*
-DB_HOST=127.0.0.1
-DB_DATABASE=snipeit
-DB_USERNAME=snipeit
-DB_PASSWORD=snipeit
-
-         */
-
 
         $finder = new Finder();
-        $env_files = $finder->ignoreDotFiles(false)->depth('< 5')->files()->in(dirname($this->nginxSite->get_folder_abs_path()))->name('.env');
+
+        //Don't forget that Finder ignores DotFiles by default!
+        //We're limiting to only 3 folders deep for now because there really shouldn't be a configuration
+        //that's deeper than that, right?
+        $env_files = $finder->ignoreDotFiles(false)->depth('< 3')->files()->in(dirname($this->nginxSite->get_folder_abs_path()))->name('.env');
         if($env_files->hasResults()) {
             foreach($env_files as $file){
 
@@ -105,7 +125,6 @@ DB_PASSWORD=snipeit
                     $_ENV = $backup;
                     continue;
                 }
-
 
                 foreach($known_formats as $keys){
 
