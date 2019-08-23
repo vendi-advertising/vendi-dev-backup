@@ -15,7 +15,8 @@
         "ext-json": "*",
         "webmozart/path-util": "^2.3",
         "composer/composer": "^1.9",
-        "pear/archive_tar": "^1.4"
+        "pear/archive_tar": "^1.4",
+        "spatie/db-dumper": "^2.14"
     },
     "require-dev": {
         "symfony/var-dumper": "^4.3"
