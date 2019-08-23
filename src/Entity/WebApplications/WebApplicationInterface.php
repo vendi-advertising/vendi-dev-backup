@@ -6,5 +6,7 @@ interface WebApplicationInterface
 {
     public function get_application_type() : string;
 
-    public function has_known_database_config() : bool;
+    public function has_database() : bool;
+
+    public function dump_database() : string;
 }
