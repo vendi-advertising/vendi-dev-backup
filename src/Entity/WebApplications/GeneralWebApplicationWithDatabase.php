@@ -92,7 +92,7 @@ class GeneralWebApplicationWithDatabase extends WebApplicationBase
 
     public function get_application_type(): string
     {
-        return 'General Web Application Without Database';
+        return 'General Web Application With Database';
     }
 
     public function has_database(): bool

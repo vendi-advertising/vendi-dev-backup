@@ -27,9 +27,9 @@ class PhpApplicationFigureOuter
     {
 
         return  $this->look_for_wordpress() ??
-                $this->look_for_drupal() ??
-                $this->look_for_generic_env() ??
-                new GeneralWebApplicationWithoutDatabase($this->nginxSite);
+            $this->look_for_drupal() ??
+            $this->look_for_generic_env() ??
+            new GeneralWebApplicationWithoutDatabase($this->nginxSite);
     }
 
     protected function look_for_wordpress() : ?WordPressApplication
@@ -66,7 +66,7 @@ class PhpApplicationFigureOuter
         return null;
     }
 
-    protected function look_for_generic_env() : ?WebApplicationInterface
+    protected function look_for_generic_env() : ?GeneralWebApplicationWithDatabase
     {
         $known_formats = [
             [
@@ -84,10 +84,14 @@ DB_USERNAME=snipeit
 DB_PASSWORD=snipeit
 
          */
+
+
         $finder = new Finder();
-        $env_files = $finder->depth('< 5')->files()->in(dirname($this->nginxSite->get_folder_abs_path()))->name('.env');
+        $env_files = $finder->ignoreDotFiles(false)->depth('< 5')->files()->in(dirname($this->nginxSite->get_folder_abs_path()))->name('.env');
         if($env_files->hasResults()) {
             foreach($env_files as $file){
+
+                dump($file->getPathname());
 
                 $backup = $_ENV;
                 foreach($_ENV as $key => $value){
@@ -95,7 +99,13 @@ DB_PASSWORD=snipeit
                 }
 
                 $dotenv = new Dotenv(false);
-                $dotenv->load($file->getPathname());
+                try{
+                    $dotenv->loadEnv($file->getPathname());
+                }catch(\Exception $ex){
+                    $_ENV = $backup;
+                    continue;
+                }
+
 
                 foreach($known_formats as $keys){
 
@@ -104,13 +114,17 @@ DB_PASSWORD=snipeit
                     $potential = new GeneralWebApplicationWithDatabase($this->nginxSite);
 
                     foreach($keys as $key => $value){
+
                         if(!$value){
                             continue;
                         }
+
                         if(!array_key_exists($value, $_ENV)){
                             $is_valid = false;
+                            dump('key not found: ' . $value);
                             break;
                         }
+
                         switch($key){
                             case 'host':
                                 $potential->setDbHost($_ENV[$value]);
