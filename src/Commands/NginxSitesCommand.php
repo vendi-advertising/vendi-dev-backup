@@ -12,7 +12,7 @@ class NginxSitesCommand extends CommandBase
     protected function configure()
     {
         $this
-            ->setName('app:nginx')
+            ->setName('nginx:list-sites')
             ->setDescription('Get all configured nginx sites')
         ;
     }

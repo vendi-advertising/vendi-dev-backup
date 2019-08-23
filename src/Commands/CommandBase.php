@@ -9,7 +9,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-
 class CommandBase extends Command
 {
 
@@ -63,10 +62,8 @@ class CommandBase extends Command
     {
         $this->_in_multi_command = true;
 
-        foreach( $commands as $command )
-        {
-            if( ! $this->run_command_with_working_directory( $command, "An unknown error occurred while running command ${command}" , $working_directory, $quiet ) )
-            {
+        foreach( $commands as $command ) {
+            if( ! $this->run_command_with_working_directory( $command, "An unknown error occurred while running command ${command}" , $working_directory, $quiet ) ) {
                 $this->_in_multi_command = false;
                 $this->reset_next_command_timeout();
                 return false;
@@ -84,11 +81,16 @@ class CommandBase extends Command
      * This is the workhorse function. All run commands lead here so be careful
      * when editing.
      *
-     * @param  string       $command               [description]
-     * @param  string       $failure_error_message [description]
-     * @param  string|null  $working_directory     [description]
-     * @param  bool|boolean $quiet                 [description]
-     * @return [type]                              [description]
+     * @param  string       $command               The command to run.
+     * @param  string       $failure_error_message The message to display before termintating if there was an error running the command. Ignored if $quiet is true.
+     * @param  string|null  $working_directory     Optional, default null. The directory to change to for running the command.
+     * @param  bool         $quiet                 Optional, default false. If true, this function will return false on error instead of terminating.
+     * @param  array|null   $command_outputs       Optional, default null. An array that will be populated with stdout and stderr for the given command.
+     * @return bool                                Returns true for commands that exit with code 0, otherwise false as long as $quiet is true.
+     * 
+     * NOTE: This code was lifted from the vendi-admin-cli however I think that was lifted from another project. Unfortunately
+     * I'm unable to find the original code so I don't quite remember the full logic for multi-command mode. It generally
+     * makes sense, however I don't currently remember the specifics. Sorry.
      */
     protected function run_command_with_working_directory( string $command, string $failure_error_message, string $working_directory = null, bool $quiet = false, array &$command_outputs = null) : bool
     {
@@ -128,7 +130,6 @@ class CommandBase extends Command
                 break;
             }
 
-            // dump( $status );
             sleep( 1 );
         }
 
@@ -143,20 +144,29 @@ class CommandBase extends Command
 
         proc_close( $process );
 
+        //Pass to provided array
         $command_outputs = [
             'stdout' => $stdout,
             'stderr' => $stderr,
         ];
 
+        //Non-zero exit code means error
         if( 0 !== $exit_code ) {
+
             if( $quiet ) {
+
+                //Mulit-command mode stuff
                 if( ! $this->_in_multi_command ) {
                     $this->reset_next_command_timeout();
                 }
+
+                //In quiet mode we just return false
                 return false;
             }
 
             $io->error( $failure_error_message );
+
+            //Dump out some additional hopefully helpful messages
             if( $stderr ) {
                 $io->error( $stderr );
             }
