@@ -127,15 +127,24 @@ class PhpApplicationFigureOuter
     {
         $known_files = [
             '../includes/constants.php' => [
-                'host' => null,
-                'name' => "/^\s*define\(\s*'VENDI_DB_NAME',\s*'(?<VALUE>[^']+)'\s*\);/m",
-                'user' => "/^\s*define\(\s*'VENDI_DB_USER',\s*'(?<VALUE>[^']+)'\s*\);/m",
-                'pass' => "/^\s*define\(\s*'VENDI_DB_PASS',\s*'(?<VALUE>[^']+)'\s*\);/m",
-                'port' => null,
+                [
+                    'host' => null,
+                    'name' => "/^\s*define\(\s*'VENDI_DB_NAME',\s*'(?<VALUE>[^']+)'\s*\);/m",
+                    'user' => "/^\s*define\(\s*'VENDI_DB_USER',\s*'(?<VALUE>[^']+)'\s*\);/m",
+                    'pass' => "/^\s*define\(\s*'VENDI_DB_PASS',\s*'(?<VALUE>[^']+)'\s*\);/m",
+                    'port' => null,
+                ],
+                [
+                    'host' => null,
+                    'name' => "/^\s*define\(\s*'VENDI_BLORK_DB_NAME',\s*'(?<VALUE>[^']+)'\s*\);/m",
+                    'user' => "/^\s*define\(\s*'VENDI_BLORK_DB_USER',\s*'(?<VALUE>[^']+)'\s*\);/m",
+                    'pass' => "/^\s*define\(\s*'VENDI_BLORK_DB_PASS',\s*'(?<VALUE>[^']+)'\s*\);/m",
+                    'port' => null,
+                ]
             ],
         ];
 
-        foreach($known_files as $rel_path => $keys){
+        foreach($known_files as $rel_path => $collection_of_keys){
             $abs_path = Path::canonicalize(Path::join($this->nginxSite->get_folder_abs_path(), $rel_path));
             if(!is_file($abs_path)){
                 continue;
@@ -143,26 +152,29 @@ class PhpApplicationFigureOuter
 
             $contents = file_get_contents($abs_path);
 
-            $is_valid = true;
-            $potential = new GeneralWebApplicationWithDatabase($this->nginxSite);
+            foreach($collection_of_keys as $keys){
 
-            foreach($keys as $key => $value) {
-                if(!$value){
-                    continue;
+                $is_valid = true;
+                $potential = new GeneralWebApplicationWithDatabase($this->nginxSite);
+
+                foreach($keys as $key => $value) {
+                    if(!$value){
+                        continue;
+                    }
+
+                    if(!preg_match($value, $contents, $matches)){
+                        $is_valid = false;
+                        continue;
+                    }
+
+                    $actual_value = $matches['VALUE'];
+
+                    $this->set_property_by_key($potential, $key, $actual_value);
                 }
 
-                if(!preg_match($value, $contents, $matches)){
-                    $is_valid = false;
-                    continue;
+                if($is_valid){
+                    return $potential;
                 }
-
-                $actual_value = $matches['VALUE'];
-
-                $this->set_property_by_key($potential, $key, $actual_value);
-            }
-
-            if($is_valid){
-                return $potential;
             }
         }
 
