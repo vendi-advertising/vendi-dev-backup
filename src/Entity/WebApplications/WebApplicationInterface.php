@@ -13,4 +13,6 @@ interface WebApplicationInterface
     public function exclude_from_backup() : bool;
 
     public function get_backups() : array;
+
+    public function add_backup(string $key, string $path) : array;
 }

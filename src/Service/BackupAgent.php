@@ -56,13 +56,17 @@ class BackupAgent
                     $dumper = new WordPressDatabaseDumper($app);
                     $dumper->dump_database();
 
-                    $tmp_name = '/tmp/backup.sql.tgz';
+                    $tmp_name = $dumper->get_backup_filename() . '.tgz';
                     if(is_file($tmp_name)){
                         unlink($tmp_name);
                     }
 
                     $tar_object_compressed = new Archive_Tar($tmp_name, 'gz');
-                    $tar_object_compressed->create($dumper->get_backup_filename());
+                    if(!$tar_object_compressed->create($dumper->get_backup_filename())){
+                        throw new \Exception('Unable to make archive for some reason');
+                    }
+
+                    $app->add_backup('DB', $tar_object_compressed);
 
                     exit;
                     break;
