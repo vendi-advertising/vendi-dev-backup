@@ -5,6 +5,7 @@ namespace Vendi\InternalTools\DevServerBackup\Service;
 use Archive_Tar;
 use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\WebApplicationInterface;
 use Vendi\InternalTools\DevServerBackup\Service\DatabaseDumpers\DatabaseDumperInterface;
+use Vendi\InternalTools\DevServerBackup\Service\DatabaseDumpers\DrupalDatabaseDumper;
 use Webmozart\PathUtil\Path;
 
 class BackupAgent
@@ -70,6 +71,10 @@ class BackupAgent
             switch($app->get_application_type()) {
                 case WebApplicationInterface::KNOWN_APPLICATION_TYPE_WORDPRESS:
                     $dumper = new WordPressDatabaseDumper($app);
+                    break;
+
+                case WebApplicationInterface::KNOWN_APPLICATION_TYPE_DRUPAL:
+                    $dumper = new DrupalDatabaseDumper($app);
                     break;
             }
 

@@ -2,8 +2,25 @@
 
 namespace Vendi\InternalTools\DevServerBackup\Service\DatabaseDumpers;
 
+use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\WordPressApplication;
+
 abstract class DatabaseDumperBase implements DatabaseDumperInterface
 {
+    private $application;
+
+    /**
+     * @return mixed
+     */
+    public function getApplication()
+    {
+        return $this->application;
+    }
+
+    public function __construct(WordPressApplication $application)
+    {
+        $this->application = $application;
+    }
+
     protected function create_tmp_file() : string
     {
         return \tempnam(\sys_get_temp_dir(), 'VENDI_BACKUP');
