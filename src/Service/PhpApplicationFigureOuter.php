@@ -147,7 +147,6 @@ class PhpApplicationFigureOuter
 
                         if(!array_key_exists($value, $_ENV)){
                             $is_valid = false;
-                            dump('key not found: ' . $value);
                             break;
                         }
 
