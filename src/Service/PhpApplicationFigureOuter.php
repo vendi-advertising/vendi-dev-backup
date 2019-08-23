@@ -18,9 +18,12 @@ class PhpApplicationFigureOuter
         $this->nginxSite = $nginxSite;
     }
 
-    public function get_application() : WebApplicationInterface
+    public function get_application() : ? WebApplicationInterface
     {
         $finder = new Finder();
         dump($finder->files()->in($this->nginxSite->get_folder_abs_path())->name('wp-config.php')->hasResults());
+
+        return null;
     }
+
 }
