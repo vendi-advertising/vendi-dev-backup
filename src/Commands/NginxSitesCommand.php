@@ -45,7 +45,12 @@ class NginxSitesCommand extends CommandBase
         $parser = new NginxSiteParser();
         $sites = $parser->parse_nginx_output($stdout);
 
-        $this->get_io()->table(['Projects', 'Folders'], [$sites]);
+        $rows = [];
+        foreach($sites as $site) {
+            $rows[] = [$site->get_project_name(), $site->get_folder_abs_path() ];
+        }
+
+        $this->get_io()->table(['Projects', 'Folders'], $rows);
 
 //        dump($sites);
 
