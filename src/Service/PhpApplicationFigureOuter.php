@@ -100,6 +100,13 @@ class PhpApplicationFigureOuter
                 'pass' => 'DB_PASSWORD',
                 'port' => null,
             ],
+            [
+                'host' => 'DB_HOST',
+                'name' => 'DB_NAME',
+                'user' => 'DB_USERNAME',
+                'pass' => 'DB_PASSWORD',
+                'port' => null,
+            ],
         ];
 
         $finder = new Finder();
