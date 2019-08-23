@@ -5,8 +5,7 @@ define( 'VENDI_DEV_BACKUP_PATH', __DIR__ );
 
 require VENDI_DEV_BACKUP_PATH . '/includes/autoload.php';
 
-$nginx_command = new Vendi\InternalTools\DevServerBackup\Commands\NginxSitesCommand();
-
 $application = new Symfony\Component\Console\Application( 'Vendi Dev Backup', '0.1' );
-$application->add( $nginx_command );
+$application->add(new Vendi\InternalTools\DevServerBackup\Commands\NginxSitesCommand());
+$application->add(new Vendi\InternalTools\DevServerBackup\Commands\BackupAgentCommand());
 $application->run();
