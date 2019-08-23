@@ -6,6 +6,7 @@ use Archive_Tar;
 use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\WebApplicationInterface;
 use Vendi\InternalTools\DevServerBackup\Service\DatabaseDumpers\DatabaseDumperInterface;
 use Vendi\InternalTools\DevServerBackup\Service\DatabaseDumpers\DrupalDatabaseDumper;
+use Vendi\InternalTools\DevServerBackup\Service\DatabaseDumpers\WordPressDatabaseDumper;
 use Webmozart\PathUtil\Path;
 
 class BackupAgent

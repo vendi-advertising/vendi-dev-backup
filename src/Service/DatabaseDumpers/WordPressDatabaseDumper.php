@@ -1,6 +1,6 @@
 <?php
 
-namespace Vendi\InternalTools\DevServerBackup\Service;
+namespace Vendi\InternalTools\DevServerBackup\Service\DatabaseDumpers;
 
 class WordPressDatabaseDumper extends DatabaseDumperBase
 {
