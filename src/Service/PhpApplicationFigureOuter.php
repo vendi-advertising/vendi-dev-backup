@@ -136,8 +136,7 @@ class PhpApplicationFigureOuter
         ];
 
         foreach($known_files as $rel_path => $keys){
-            $abs_path = Path::canonicalize($this->nginxSite->get_folder_abs_path(), $rel_path);
-            dump($abs_path);
+            $abs_path = Path::canonicalize(Path::join($this->nginxSite->get_folder_abs_path(), $rel_path));
             if(!is_file($abs_path)){
                 continue;
             }
@@ -153,6 +152,7 @@ class PhpApplicationFigureOuter
                 }
 
                 if(!preg_match($value, $contents, $matches)){
+                    $is_valid = false;
                     continue;
                 }
 
@@ -162,7 +162,6 @@ class PhpApplicationFigureOuter
             }
 
             if($is_valid){
-                dump('THis worked!');
                 return $potential;
             }
         }
