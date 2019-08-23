@@ -2,9 +2,11 @@
 
 namespace Vendi\InternalTools\DevServerBackup\Service;
 
+use Symfony\Component\Dotenv\Dotenv;
 use Symfony\Component\Finder\Finder;
 use Vendi\InternalTools\DevServerBackup\Entity\NginxSite;
 use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\DrupalApplication;
+use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\GeneralWebApplicationWithDatabase;
 use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\GeneralWebApplicationWithoutDatabase;
 use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\WebApplicationInterface;
 use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\WordPressApplication;
@@ -23,11 +25,26 @@ class PhpApplicationFigureOuter
 
     public function get_application() : WebApplicationInterface
     {
+
+        return  $this->look_for_wordpress() ??
+                $this->look_for_drupal() ??
+                $this->look_for_generic_env() ??
+                new GeneralWebApplicationWithoutDatabase($this->nginxSite);
+    }
+
+    protected function look_for_wordpress() : ?WordPressApplication
+    {
         $finder = new Finder();
         if($finder->depth('== 0')->files()->in($this->nginxSite->get_folder_abs_path())->name('wp-config.php')->hasResults()){
             return new WordPressApplication($this->nginxSite);
         }
 
+        return null;
+    }
+
+    protected function look_for_drupal() : ?DrupalApplication
+    {
+        $finder = new Finder();
         $composer_files = $finder->depth('== 0')->files()->in(dirname($this->nginxSite->get_folder_abs_path()))->name('composer.json');
         if($composer_files->hasResults()) {
             $files = iterator_to_array($composer_files);
@@ -44,12 +61,93 @@ class PhpApplicationFigureOuter
                     return new DrupalApplication($this->nginxSite);
                 }
             }
-
         }
 
-        dump($this->nginxSite);
+        return null;
+    }
 
-        return new GeneralWebApplicationWithoutDatabase($this->nginxSite);
+    protected function look_for_generic_env() : ?WebApplicationInterface
+    {
+        $known_formats = [
+            [
+                'host' => 'DB_HOST',
+                'name' => 'DB_DATABASE',
+                'user' => 'DB_USERNAME',
+                'pass' => 'DB_PASSWORD',
+                'port' => null,
+            ],
+        ];
+        /*
+DB_HOST=127.0.0.1
+DB_DATABASE=snipeit
+DB_USERNAME=snipeit
+DB_PASSWORD=snipeit
+
+         */
+        $finder = new Finder();
+        $env_files = $finder->depth('< 5')->files()->in(dirname($this->nginxSite->get_folder_abs_path()))->name('.env');
+        if($env_files->hasResults()) {
+            foreach($env_files as $file){
+
+                $backup = $_ENV;
+                foreach($_ENV as $key => $value){
+                    unset($_ENV[$key]);
+                }
+
+                $dotenv = new Dotenv(false);
+                $dotenv->load($file->getPathname());
+
+                foreach($known_formats as $keys){
+
+                    $is_valid = true;
+
+                    $potential = new GeneralWebApplicationWithDatabase($this->nginxSite);
+
+                    foreach($keys as $key => $value){
+                        if(!$value){
+                            continue;
+                        }
+                        if(!array_key_exists($value, $_ENV)){
+                            $is_valid = false;
+                            break;
+                        }
+                        switch($key){
+                            case 'host':
+                                $potential->setDbHost($_ENV[$value]);
+                                break;
+
+                            case 'name':
+                                $potential->setDbName($_ENV[$value]);
+                                break;
+
+                            case 'user':
+                                $potential->setDbUser($_ENV[$value]);
+                                break;
+
+                            case 'pass':
+                                $potential->setDbPass($_ENV[$value]);
+                                break;
+
+                            case 'port':
+                                $potential->setDbPort($_ENV[$value]);
+                                break;
+
+                            default:
+                                throw new \Exception('The known formats array is not setup correctly.');
+                        }
+                    }
+
+                    if($is_valid){
+                        $_ENV = $backup;
+                        return $potential;
+                    }
+                }
+
+                $_ENV = $backup;
+            }
+        }
+
+        return null;
     }
 
 }

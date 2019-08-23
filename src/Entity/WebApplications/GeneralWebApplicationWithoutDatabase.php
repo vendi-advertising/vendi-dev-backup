@@ -3,9 +3,7 @@
 namespace Vendi\InternalTools\DevServerBackup\Entity\WebApplications;
 
 class GeneralWebApplicationWithoutDatabase extends WebApplicationBase
-{
-
-    public function get_application_type(): string
+{    public function get_application_type(): string
     {
         return 'General Web Application Without Database';
     }

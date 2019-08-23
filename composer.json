@@ -10,7 +10,9 @@
     ],
     "require": {
         "symfony/console": "^4.3",
-        "symfony/finder": "^4.3"
+        "symfony/finder": "^4.3",
+        "symfony/dotenv": "^4.3",
+        "ext-json": "*"
     },
     "require-dev": {
         "symfony/var-dumper": "^4.3"
