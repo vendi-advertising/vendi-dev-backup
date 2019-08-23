@@ -6,6 +6,6 @@ class DrupalApplication extends GeneralWebApplicationWithDatabase
 {
     public function get_application_type(): string
     {
-        return 'Drupal';
+        return self::KNOWN_APPLICATION_TYPE_DRUPAL;
     }
 }

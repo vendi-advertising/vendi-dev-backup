@@ -4,6 +4,7 @@ namespace Vendi\InternalTools\DevServerBackup\Service;
 
 use Archive_Tar;
 use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\WebApplicationInterface;
+use Vendi\InternalTools\DevServerBackup\Service\DatabaseDumpers\DatabaseDumperInterface;
 use Webmozart\PathUtil\Path;
 
 class BackupAgent
@@ -55,35 +56,42 @@ class BackupAgent
 
     protected function dump_databases()
     {
+        $timestamp = $this->create_timestamp_for_file();
+
         foreach($this->getApplications() as $app) {
 
             if(!$app->has_database()){
                 continue;
             }
 
+            /* @var DatabaseDumperInterface $dumper */
+            $dumper = null;
+
             switch($app->get_application_type()) {
                 case WebApplicationInterface::KNOWN_APPLICATION_TYPE_WORDPRESS:
                     $dumper = new WordPressDatabaseDumper($app);
-                    $dumper->dump_database();
-
-                    $backup_file_name = sprintf(
-                        '%1$s.%2$s.sql.tgz',
-                        $this->create_timestamp_for_file(),
-                        $app->get_nginx_site()->get_project_name()
-                    );
-
-                    $backup_file_path_abs = Path::join('/data/backups/mysql/v2/', $backup_file_name);
-                    if(is_file($backup_file_path_abs)){
-                        unlink($backup_file_path_abs);
-                    }
-
-                    $tar_object_compressed = new Archive_Tar($backup_file_path_abs, 'gz');
-                    if(!$tar_object_compressed->create($dumper->get_backup_filename())){
-                        throw new \Exception('Unable to make archive for some reason');
-                    }
-
-                    $app->add_backup('DB', $backup_file_path_abs);
+                    break;
             }
+
+            $backup_file_name_original = $dumper->dump_database();
+
+            $backup_file_name = sprintf(
+                '%1$s.%2$s.sql.tgz',
+                $timestamp,
+                $app->get_nginx_site()->get_project_name()
+            );
+
+            $backup_file_path_abs = Path::join('/data/backups/mysql/v2/', $backup_file_name);
+            if(is_file($backup_file_path_abs)){
+                unlink($backup_file_path_abs);
+            }
+
+            $tar_object_compressed = new Archive_Tar($backup_file_path_abs, 'gz');
+            if(!$tar_object_compressed->create($backup_file_name_original)){
+                throw new \Exception('Unable to make archive for some reason');
+            }
+
+            $app->add_backup('DB', $backup_file_path_abs);
         }
 
     }
