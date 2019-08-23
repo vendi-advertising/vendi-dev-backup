@@ -31,7 +31,9 @@ class PhpApplicationFigureOuter
             $this->look_for_drupal() ??
             $this->look_for_default_site() ??
             $this->look_for_html_only_site() ??
-            $this->look_for_generic_env();
+            $this->look_for_generic_env() ??
+            $this->look_for_magic_in_files()
+        ;
 
         if(!$ret){
             dump($this->nginxSite);
