@@ -2,7 +2,7 @@
 
 namespace Vendi\InternalTools\DevServerBackup\Service\DatabaseDumpers;
 
-use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\WordPressApplication;
+use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\GeneralWebApplicationWithDatabase;
 
 abstract class DatabaseDumperBase implements DatabaseDumperInterface
 {
@@ -16,7 +16,7 @@ abstract class DatabaseDumperBase implements DatabaseDumperInterface
         return $this->application;
     }
 
-    public function __construct(WordPressApplication $application)
+    public function __construct(GeneralWebApplicationWithDatabase $application)
     {
         $this->application = $application;
     }
