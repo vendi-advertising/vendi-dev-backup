@@ -44,6 +44,15 @@ class BackupAgent
         }
     }
 
+    protected function create_timestamp_for_file(\DateTime $dateTime = null) : string
+    {
+        if(!$dateTime){
+            $dateTime = new \DateTime();
+        }
+
+        return $dateTime->format('Y-m-d-Y-H-i-s');
+    }
+
     protected function dump_databases()
     {
         foreach($this->getApplications() as $app) {
@@ -57,17 +66,23 @@ class BackupAgent
                     $dumper = new WordPressDatabaseDumper($app);
                     $dumper->dump_database();
 
-                    $backup_file_name = Path::join('/data/backups/mysql/v2/', $app->get_nginx_site()->get_project_name() . '.sql.tgz');
-                    if(is_file($backup_file_name)){
-                        unlink($backup_file_name);
+                    $backup_file_name = sprintf(
+                        '%1$s.%2$s.sql.tgz',
+                        $this->create_timestamp_for_file(),
+                        $app->get_nginx_site()->get_project_name()
+                    );
+
+                    $backup_file_path_abs = Path::join('/data/backups/mysql/v2/', $backup_file_name);
+                    if(is_file($backup_file_path_abs)){
+                        unlink($backup_file_path_abs);
                     }
 
-                    $tar_object_compressed = new Archive_Tar($backup_file_name, 'gz');
+                    $tar_object_compressed = new Archive_Tar($backup_file_path_abs, 'gz');
                     if(!$tar_object_compressed->create($dumper->get_backup_filename())){
                         throw new \Exception('Unable to make archive for some reason');
                     }
 
-                    $app->add_backup('DB', $backup_file_name);
+                    $app->add_backup('DB', $backup_file_path_abs);
 
                     exit;
                     break;
