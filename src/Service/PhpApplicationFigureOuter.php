@@ -29,6 +29,7 @@ class PhpApplicationFigureOuter
         $ret = $this->look_for_wordpress() ??
             $this->look_for_drupal() ??
             $this->look_for_default_site() ??
+            $this->look_for_html_only_site() ??
             $this->look_for_generic_env();
 
         if(!$ret){
@@ -68,6 +69,15 @@ class PhpApplicationFigureOuter
                     return new DrupalApplication($this->nginxSite);
                 }
             }
+        }
+
+        return null;
+    }
+
+    protected function look_for_html_only_site() : ?GeneralWebApplicationWithoutDatabase
+    {
+        if(mb_strpos($this->nginxSite->get_folder_abs_path(), 'html') > 0 ){
+            return new GeneralWebApplicationWithoutDatabase($this->nginxSite);
         }
 
         return null;
