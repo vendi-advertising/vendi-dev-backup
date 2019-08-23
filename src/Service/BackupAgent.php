@@ -77,6 +77,9 @@ class BackupAgent
                 case WebApplicationInterface::KNOWN_APPLICATION_TYPE_DRUPAL:
                     $dumper = new DrupalDatabaseDumper($app);
                     break;
+
+                default:
+                    continue;
             }
 
             $backup_file_name_original = $dumper->dump_database();
