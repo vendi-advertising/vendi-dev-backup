@@ -67,7 +67,7 @@ class BackupAgent
                         throw new \Exception('Unable to make archive for some reason');
                     }
 
-                    $app->add_backup('DB', $tar_object_compressed);
+                    $app->add_backup('DB', $backup_file_name);
 
                     exit;
                     break;
