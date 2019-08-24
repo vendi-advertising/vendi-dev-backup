@@ -14,6 +14,10 @@ class BackupAgent
     private $sites = [];
 
     private $applications = [];
+    /**
+     * @var string
+     */
+    private $storage_location;
 
     /**
      * @return WebApplicationInterface[]
@@ -29,6 +33,19 @@ class BackupAgent
     public function getSites(): array
     {
         return $this->sites;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStorageLocation(): string
+    {
+        return $this->storage_location;
+    }
+
+    public function __construct(string $storage_location)
+    {
+        $this->storage_location = $storage_location;
     }
 
     protected function load_sites_to_backup()
@@ -91,7 +108,7 @@ class BackupAgent
                 $app->get_nginx_site()->get_project_name()
             );
 
-            $backup_file_path_abs = Path::join('/data/backups/mysql/v2/', $backup_file_name);
+            $backup_file_path_abs = Path::join($this->getStorageLocation(), $backup_file_name);
             if(is_file($backup_file_path_abs)){
                 unlink($backup_file_path_abs);
             }

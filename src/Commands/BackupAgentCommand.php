@@ -15,6 +15,7 @@ class BackupAgentCommand extends Command
         $this
             ->setName('backup:run')
             ->setDescription('Run the backup')
+            ->addArgument('storage-location', InputArgument::REQUIRED, 'Where should backups be stored?')
         ;
     }
 
@@ -37,6 +38,8 @@ class BackupAgentCommand extends Command
             $io->error( 'The backup command must be run with higher privileges.' );
             exit;
         }
+
+        $storage_location = $input->getArgument('storage-location');
 
         $ba = new BackupAgent();
         $ba->run();
