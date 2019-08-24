@@ -9,7 +9,7 @@ class DrupalDatabaseDumper extends DatabaseDumperBase
         $command_outputs = [];
         $version_command = sprintf(
             'drush version --pipe --root=%1$s',
-            escapeshellarg($this->getApplication()->getNginxSite()->get_folder_abs_path()),
+            escapeshellarg($this->getApplication()->getNginxSite()->get_folder_abs_path())
         );
         $this->run_command($version_command, $command_outputs);
         $version = $command_outputs['stdout'];
