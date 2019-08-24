@@ -42,7 +42,7 @@ class BackupAgentCommand extends Command
 
         $storage_location = $input->getArgument('storage-location');
 
-        $ba = new BackupAgent();
+        $ba = new BackupAgent($storage_location);
         $ba->run();
     }
 }

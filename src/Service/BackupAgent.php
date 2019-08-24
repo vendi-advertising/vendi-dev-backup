@@ -114,7 +114,7 @@ class BackupAgent
             }
 
             $tar_object_compressed = new Archive_Tar($backup_file_path_abs, 'gz');
-            if(!$tar_object_compressed->create($backup_file_name_original)){
+            if(!$tar_object_compressed->create([$backup_file_name_original])){
                 throw new \Exception('Unable to make archive for some reason');
             }
 
