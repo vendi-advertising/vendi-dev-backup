@@ -41,7 +41,7 @@ class BackupAgent
         $this->storage_location = $storage_location;
         $this->createLogger();
         $this->addLoggerSource(new StreamHandler('path/to/your.log', Logger::DEBUG));
-        $this->addLoggerSource(new SyslogHandler(LOG_USER, Logger::WARNING));
+        $this->addLoggerSource(new SyslogHandler('vendi-dev-backup', LOG_USER, Logger::WARNING));
     }
 
     protected function createLogger()
