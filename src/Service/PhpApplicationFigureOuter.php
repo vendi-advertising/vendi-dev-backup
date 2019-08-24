@@ -8,6 +8,7 @@ use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Dotenv\Dotenv;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\SplFileInfo;
 use Vendi\InternalTools\DevServerBackup\Entity\NginxSite;
 use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\GeneralWebApplicationWithDatabase;
 use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\GeneralWebApplicationWithoutDatabase;
@@ -71,7 +72,7 @@ class PhpApplicationFigureOuter extends ServiceWithLogger
     {
         $this->getLogger()->debug('Performing html-only test');
         if (mb_strpos($this->nginxSite->get_folder_abs_path(), 'html') > 0) {
-            $this->getLogger()->info('Site is a html-only site', ['nginx-site' => $this->$this->nginxSite]);
+            $this->getLogger()->info('Site is a html-only site', ['nginx-site' => $this->nginxSite]);
             return new GeneralWebApplicationWithoutDatabase($this->nginxSite, true);
         }
 
@@ -119,6 +120,8 @@ class PhpApplicationFigureOuter extends ServiceWithLogger
         //that's deeper than that, right?
         $env_files = $finder->ignoreDotFiles(false)->depth('< 3')->files()->in(dirname($this->nginxSite->get_folder_abs_path()))->name('.env');
         if ($env_files->hasResults()) {
+
+            /* @var SplFileInfo $file */
             foreach ($env_files as $file) {
                 $backup = $_ENV;
                 foreach ($_ENV as $key => $value) {
