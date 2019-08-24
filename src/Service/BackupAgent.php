@@ -1,8 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Vendi\InternalTools\DevServerBackup\Service;
 
 use Archive_Tar;
+use Monolog\Handler\AbstractProcessingHandler;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\SyslogHandler;
+use Monolog\Logger;
+use Psr\Log\LoggerInterface;
+use Vendi\InternalTools\DevServerBackup\Entity\NginxSite;
 use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\WebApplicationInterface;
 use Vendi\InternalTools\DevServerBackup\Service\DatabaseDumpers\DatabaseDumperInterface;
 use Vendi\InternalTools\DevServerBackup\Service\DatabaseDumpers\DrupalDatabaseDumper;
@@ -14,6 +22,12 @@ class BackupAgent
     private $sites = [];
 
     private $applications = [];
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
     /**
      * @var string
      */
@@ -46,27 +60,30 @@ class BackupAgent
     public function __construct(string $storage_location)
     {
         $this->storage_location = $storage_location;
+        $this->createLogger();
+        $this->addLoggerSource(new StreamHandler('path/to/your.log', Logger::DEBUG));
+        $this->addLoggerSource(new SyslogHandler(LOG_USER, Logger::WARNING));
     }
 
     protected function load_sites_to_backup()
     {
-        $nginx_config_dumper = new NginxConfigDumper();
+        $nginx_config_dumper = new NginxConfigDumper($this->getLogger());
         $stdout = $nginx_config_dumper->get_nginx_config();
 
-        $parser = new NginxSiteParser();
+        $parser = new NginxSiteParser($this->getLogger());
         $this->sites = $parser->parse_nginx_output($stdout);
     }
 
     protected function convert_sites_to_applications()
     {
-        foreach($this->getSites() as $site){
-            $this->applications[] = (new PhpApplicationFigureOuter($site))->get_application();
+        foreach ($this->getSites() as $site) {
+            $this->applications[] = (new PhpApplicationFigureOuter($this->getLogger(), $site))->get_application();
         }
     }
 
     protected function create_timestamp_for_file(\DateTime $dateTime = null) : string
     {
-        if(!$dateTime){
+        if (!$dateTime) {
             $dateTime = new \DateTime();
         }
 
@@ -77,16 +94,15 @@ class BackupAgent
     {
         $timestamp = $this->create_timestamp_for_file();
 
-        foreach($this->getApplications() as $app) {
-
-            if(!$app->has_database()){
+        foreach ($this->getApplications() as $app) {
+            if (!$app->has_database()) {
                 continue;
             }
 
             /* @var DatabaseDumperInterface $dumper */
             $dumper = null;
 
-            switch($app->get_application_type()) {
+            switch ($app->get_application_type()) {
                 case WebApplicationInterface::KNOWN_APPLICATION_TYPE_WORDPRESS:
                     $dumper = new WordPressDatabaseDumper($app);
                     break;
@@ -96,7 +112,7 @@ class BackupAgent
                     break;
             }
 
-            if(!$dumper){
+            if (!$dumper) {
                 continue;
             }
 
@@ -109,18 +125,17 @@ class BackupAgent
             );
 
             $backup_file_path_abs = Path::join($this->getStorageLocation(), $backup_file_name);
-            if(is_file($backup_file_path_abs)){
+            if (is_file($backup_file_path_abs)) {
                 unlink($backup_file_path_abs);
             }
 
             $tar_object_compressed = new Archive_Tar($backup_file_path_abs, 'gz');
-            if(!$tar_object_compressed->create([$backup_file_name_original])){
+            if (!$tar_object_compressed->create([$backup_file_name_original])) {
                 throw new \Exception('Unable to make archive for some reason');
             }
 
             $app->add_backup('DB', $backup_file_path_abs);
         }
-
     }
 
     public function run()
@@ -128,5 +143,26 @@ class BackupAgent
         $this->load_sites_to_backup();
         $this->convert_sites_to_applications();
         $this->dump_databases();
+    }
+
+    public function addLoggerSource(AbstractProcessingHandler  $handler)
+    {
+        $this->getLogger()->pushHandler($handler);
+    }
+
+    protected function createLogger()
+    {
+        if (!$this->logger) {
+            // create a log channel
+            $this->logger = new Logger('vendi-dev-backup');
+        }
+    }
+
+    /**
+     * @return LoggerInterface
+     */
+    public function getLogger(): LoggerInterface
+    {
+        return $this->logger;
     }
 }

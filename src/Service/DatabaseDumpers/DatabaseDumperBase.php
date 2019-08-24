@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Vendi\InternalTools\DevServerBackup\Service\DatabaseDumpers;
 
 use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\GeneralWebApplicationWithDatabase;
@@ -34,34 +36,34 @@ abstract class DatabaseDumperBase implements DatabaseDumperInterface
             2 => [ 'pipe', 'w' ],  // stderr
         ];
 
-        $process = \proc_open( $properly_escaped_command, $descriptorspec, $pipes );
-        if( ! \is_resource( $process ) ) {
+        $process = \proc_open($properly_escaped_command, $descriptorspec, $pipes);
+        if (! \is_resource($process)) {
             throw new \Exception('Could not create process. Weird.');
         }
 
         $exit_code = null;
 
         //Allow commands to run for 120 seconds
-        for( $i = 0; $i < 120; $i++ ) {
-            $status = \proc_get_status( $process );
-            if( ! $status[ 'running' ] ) {
+        for ($i = 0; $i < 120; $i++) {
+            $status = \proc_get_status($process);
+            if (! $status[ 'running' ]) {
                 $exit_code = (int) $status[ 'exitcode' ];
                 break;
             }
 
-            \sleep( 1 );
+            \sleep(1);
         }
 
         //TODO: We're not handling dangling processes above, I think we need to
         //call proc_get_status( $process ) one last time.
 
-        $stdout = \stream_get_contents( $pipes[ 1 ] );
-        \fclose( $pipes[ 1 ] );
+        $stdout = \stream_get_contents($pipes[ 1 ]);
+        \fclose($pipes[ 1 ]);
 
-        $stderr = \stream_get_contents( $pipes[ 2 ] );
-        \fclose( $pipes[ 2 ] );
+        $stderr = \stream_get_contents($pipes[ 2 ]);
+        \fclose($pipes[ 2 ]);
 
-        \proc_close( $process );
+        \proc_close($process);
 
         //Pass to provided array
         $command_outputs = [
@@ -70,7 +72,7 @@ abstract class DatabaseDumperBase implements DatabaseDumperInterface
         ];
 
         //Non-zero exit code means error
-        if( 0 !== $exit_code ) {
+        if (0 !== $exit_code) {
             dump($properly_escaped_command);
             dump($command_outputs);
             throw new \Exception('Process returned error code: ' . $exit_code);

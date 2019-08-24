@@ -1,50 +1,72 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Vendi\InternalTools\DevServerBackup\Service;
 
-abstract class ServiceWithProcOpen
+use function fclose;
+use function is_resource;
+use function proc_close;
+use function proc_get_status;
+use function proc_open;
+use function sleep;
+use function stream_get_contents;
+use function sys_get_temp_dir;
+use function tempnam;
+
+abstract class ServiceWithProcOpen extends ServiceWithLogger
 {
-    protected function create_tmp_file() : string
+    /**
+     * @var int
+     */
+    private $timeoutInSeconds = 120;
+
+    protected function create_tmp_file(): string
     {
-        return \tempnam(\sys_get_temp_dir(), 'VENDI_BACKUP');
+        return tempnam(sys_get_temp_dir(), 'VENDI_BACKUP');
     }
 
-    protected function run_command($properly_escaped_command, &$command_outputs = null) : bool
+    protected function run_command($properly_escaped_command, &$command_outputs = null): bool
     {
+        //Default to an empty array to erase anything coming in
+        $command_outputs = [];
+
+        $this->getLogger()->info('Running shell command', ['command' => $properly_escaped_command]);
         $descriptorspec = [
-            0 => [ 'pipe', 'r' ],  // stdin
-            1 => [ 'pipe', 'w' ],  // stdout
-            2 => [ 'pipe', 'w' ],  // stderr
+            0 => ['pipe', 'r'],  // stdin
+            1 => ['pipe', 'w'],  // stdout
+            2 => ['pipe', 'w'],  // stderr
         ];
 
-        $process = \proc_open( $properly_escaped_command, $descriptorspec, $pipes );
-        if( ! \is_resource( $process ) ) {
-            throw new \Exception('Could not create process. Weird.');
+        $process = proc_open($properly_escaped_command, $descriptorspec, $pipes);
+        if (!is_resource($process)) {
+            $this->getLogger()->error('Calling proc_open did not return a resource.');
+            return false;
         }
 
         $exit_code = null;
 
         //Allow commands to run for 120 seconds
-        for( $i = 0; $i < 120; $i++ ) {
-            $status = \proc_get_status( $process );
-            if( ! $status[ 'running' ] ) {
-                $exit_code = (int) $status[ 'exitcode' ];
+        for ($i = 0; $i < $this->getTimeoutInSeconds(); $i++) {
+            $status = proc_get_status($process);
+            if (!$status['running']) {
+                $exit_code = (int)$status['exitcode'];
                 break;
             }
 
-            \sleep( 1 );
+            sleep(1);
         }
 
         //TODO: We're not handling dangling processes above, I think we need to
         //call proc_get_status( $process ) one last time.
 
-        $stdout = \stream_get_contents( $pipes[ 1 ] );
-        \fclose( $pipes[ 1 ] );
+        $stdout = stream_get_contents($pipes[1]);
+        fclose($pipes[1]);
 
-        $stderr = \stream_get_contents( $pipes[ 2 ] );
-        \fclose( $pipes[ 2 ] );
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[2]);
 
-        \proc_close( $process );
+        proc_close($process);
 
         //Pass to provided array
         $command_outputs = [
@@ -52,13 +74,42 @@ abstract class ServiceWithProcOpen
             'stderr' => $stderr,
         ];
 
-        //Non-zero exit code means error
-        if( 0 !== $exit_code ) {
-            dump($properly_escaped_command);
-            dump($command_outputs);
-            throw new \Exception('Process returned error code: ' . $exit_code);
+        if (null === $exit_code) {
+            $this->getLogger()->warning(
+                'Process did not complete before timeout, might be dangling',
+                [
+                    'command' => $properly_escaped_command,
+                    'timeout' => $this->getTimeoutInSeconds(),
+                    'stderr' => $stderr,
+                    'stdout' => $stdout,
+                ]
+            );
+            return false;
         }
 
+        //Non-zero exit code means error
+        if (0 !== $exit_code) {
+            $this->getLogger()->warning(
+                'Process returned non-zero exit code: ' . $exit_code,
+                [
+                    'command' => $properly_escaped_command,
+                    'exit-code' => $exit_code,
+                    'stderr' => $stderr,
+                    'stdout' => $stdout,
+                ]
+            );
+            return false;
+        }
+
+        $this->getLogger()->info('Process completed successfully');
         return true;
+    }
+
+    /**
+     * @return int
+     */
+    public function getTimeoutInSeconds(): int
+    {
+        return $this->timeoutInSeconds;
     }
 }

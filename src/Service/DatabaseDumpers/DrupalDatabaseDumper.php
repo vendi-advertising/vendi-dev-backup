@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Vendi\InternalTools\DevServerBackup\Service\DatabaseDumpers;
 
 class DrupalDatabaseDumper extends DatabaseDumperBase
@@ -15,7 +17,7 @@ class DrupalDatabaseDumper extends DatabaseDumperBase
         $version = $command_outputs['stdout'];
 
         $dump_command = 'sql:dump';
-        if(version_compare($version, '9.0.0', '<=')){
+        if (version_compare($version, '9.0.0', '<=')) {
             $dump_command = 'sql-dump';
         }
 

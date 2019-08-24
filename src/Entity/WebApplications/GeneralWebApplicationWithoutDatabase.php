@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Vendi\InternalTools\DevServerBackup\Entity\WebApplications;
 
 use Vendi\InternalTools\DevServerBackup\Entity\NginxSite;

@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Vendi\InternalTools\DevServerBackup\Commands;
 
+use Symfony\Bridge\Monolog\Handler\ConsoleHandler;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -29,20 +32,21 @@ class BackupAgentCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        if(!function_exists('posix_getuid')){
-            $io->error( 'This command is only intended to be run on Linux machines.' );
+        if (!function_exists('posix_getuid')) {
+            $io->error('This command is only intended to be run on Linux machines.');
             exit;
         }
 
-        $is_root = ( 0 === posix_getuid() );
-        if( ! $is_root ) {
-            $io->error( 'The backup command must be run with higher privileges.' );
+        $is_root = (0 === posix_getuid());
+        if (! $is_root) {
+            $io->error('The backup command must be run with higher privileges.');
             exit;
         }
 
         $storage_location = $input->getArgument('storage-location');
 
         $ba = new BackupAgent($storage_location);
+        $ba->addLoggerSource(new ConsoleHandler($output));
         $ba->run();
     }
 }

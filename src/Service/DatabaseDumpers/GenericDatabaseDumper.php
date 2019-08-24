@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Vendi\InternalTools\DevServerBackup\Service\DatabaseDumpers;
 
 use Spatie\DbDumper\Databases\MySql;

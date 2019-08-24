@@ -1,8 +1,8 @@
 <?php
 
-namespace Vendi\InternalTools\DevServerBackup\Entity\WebApplications;
+declare(strict_types=1);
 
-use Vendi\InternalTools\DevServerBackup\Entity\NginxSite;
+namespace Vendi\InternalTools\DevServerBackup\Entity\WebApplications;
 
 class WordPressApplication extends GeneralWebApplicationWithDatabase
 {

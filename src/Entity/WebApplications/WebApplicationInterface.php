@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Vendi\InternalTools\DevServerBackup\Entity\WebApplications;
 
 use Vendi\InternalTools\DevServerBackup\Entity\NginxSite;
@@ -21,5 +23,4 @@ interface WebApplicationInterface
     public function add_backup(string $key, string $path);
 
     public function get_nginx_site(): NginxSite;
-
 }

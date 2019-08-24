@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Vendi\InternalTools\DevServerBackup\Entity\WebApplications;
 
 class GeneralWebApplicationWithDatabase extends WebApplicationBase
@@ -85,6 +87,7 @@ class GeneralWebApplicationWithDatabase extends WebApplicationBase
     {
         $this->db_port = $db_port;
     }
+
     private $db_pass;
     private $db_host;
     private $db_name;
