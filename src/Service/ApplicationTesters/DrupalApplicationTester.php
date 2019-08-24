@@ -5,14 +5,15 @@ namespace Vendi\InternalTools\DevServerBackup\Service\ApplicationTesters;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
+use Vendi\InternalTools\DevServerBackup\Entity\NginxSite;
 use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\WebApplicationInterface;
 use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\DrupalApplication;
 
 class DrupalApplicationTester extends ApplicationTesterBase
 {
-    public function __construct(LoggerInterface $logger)
+    public function __construct(LoggerInterface $logger, NginxSite $nginxSite)
     {
-        parent::__construct('Drupal', $logger);
+        parent::__construct('Drupal', $nginxSite, $logger);
     }
 
     public function tryToGetApplication(): ?WebApplicationInterface

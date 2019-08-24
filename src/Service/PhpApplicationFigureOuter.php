@@ -18,6 +18,11 @@ use Webmozart\PathUtil\Path;
 
 class PhpApplicationFigureOuter extends ServiceWithLogger
 {
+    /**
+     * @var NginxSite
+     */
+    private $nginxSite;
+
     public function __construct(LoggerInterface $logger, NginxSite $nginxSite)
     {
         parent::__construct($logger);
@@ -43,12 +48,12 @@ class PhpApplicationFigureOuter extends ServiceWithLogger
 
     protected function look_for_wordpress(): ?WebApplicationInterface
     {
-        return (new WordPressApplicationTester($this->getLogger()))->tryToGetApplication();
+        return (new WordPressApplicationTester($this->getLogger(), $this->nginxSite))->tryToGetApplication();
     }
 
     protected function look_for_drupal(): ?WebApplicationInterface
     {
-        return (new DrupalApplicationTester($this->getLogger()))->tryToGetApplication();
+        return (new DrupalApplicationTester($this->getLogger(), $this->nginxSite))->tryToGetApplication();
     }
 
     protected function look_for_default_site(): ?GeneralWebApplicationWithoutDatabase

@@ -4,14 +4,15 @@ namespace Vendi\InternalTools\DevServerBackup\Service\ApplicationTesters;
 
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Finder\Finder;
+use Vendi\InternalTools\DevServerBackup\Entity\NginxSite;
 use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\WebApplicationInterface;
 use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\WordPressApplication;
 
 class WordPressApplicationTester extends ApplicationTesterBase
 {
-    public function __construct(LoggerInterface $logger)
+    public function __construct(LoggerInterface $logger, NginxSite $nginxSite)
     {
-        parent::__construct('WordPress', $logger);
+        parent::__construct('WordPress', $nginxSite, $logger);
     }
 
     public function tryToGetApplication(): ?WebApplicationInterface

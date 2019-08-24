@@ -46,9 +46,10 @@ abstract class ApplicationTesterBase  extends ServiceWithLogger implements Appli
         }
     }
 
-    public function __construct(string $testerName, LoggerInterface $logger)
+    public function __construct(string $testerName, NginxSite $nginxSite, LoggerInterface $logger)
     {
         parent::__construct($logger);
         $this->testerName = $testerName;
+        $this->nginxSite = $nginxSite;
     }
 }
