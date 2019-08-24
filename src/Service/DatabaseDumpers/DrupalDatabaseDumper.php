@@ -7,7 +7,11 @@ class DrupalDatabaseDumper extends DatabaseDumperBase
     public function dump_database()
     {
         $command_outputs = [];
-        $this->run_command('drush version --pipe', $command_outputs);
+        $version_command = sprintf(
+            'drush version --pipe --root=%1$s',
+            escapeshellarg($this->getApplication()->getNginxSite()->get_folder_abs_path()),
+        );
+        $this->run_command($version_command, $command_outputs);
         $version = $command_outputs['stdout'];
 
         $dump_command = 'sql:dump';
