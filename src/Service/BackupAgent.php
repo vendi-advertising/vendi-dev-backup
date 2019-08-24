@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Vendi\InternalTools\DevServerBackup\Service;
 
 use Archive_Tar;
+use DateTime;
+use Exception;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogHandler;
@@ -16,6 +18,7 @@ use Vendi\InternalTools\DevServerBackup\Service\DatabaseDumpers\DatabaseDumperIn
 use Vendi\InternalTools\DevServerBackup\Service\DatabaseDumpers\DrupalDatabaseDumper;
 use Vendi\InternalTools\DevServerBackup\Service\DatabaseDumpers\WordPressDatabaseDumper;
 use Webmozart\PathUtil\Path;
+use const LOG_USER;
 
 class BackupAgent
 {
@@ -33,36 +36,40 @@ class BackupAgent
      */
     private $storage_location;
 
-    /**
-     * @return WebApplicationInterface[]
-     */
-    public function getApplications(): array
-    {
-        return $this->applications;
-    }
-
-    /**
-     * @return NginxSite[]
-     */
-    public function getSites(): array
-    {
-        return $this->sites;
-    }
-
-    /**
-     * @return string
-     */
-    public function getStorageLocation(): string
-    {
-        return $this->storage_location;
-    }
-
     public function __construct(string $storage_location)
     {
         $this->storage_location = $storage_location;
         $this->createLogger();
         $this->addLoggerSource(new StreamHandler('path/to/your.log', Logger::DEBUG));
         $this->addLoggerSource(new SyslogHandler(LOG_USER, Logger::WARNING));
+    }
+
+    protected function createLogger()
+    {
+        if (!$this->logger) {
+            // create a log channel
+            $this->logger = new Logger('vendi-dev-backup');
+        }
+    }
+
+    public function addLoggerSource(AbstractProcessingHandler $handler)
+    {
+        $this->getLogger()->pushHandler($handler);
+    }
+
+    /**
+     * @return LoggerInterface
+     */
+    public function getLogger(): LoggerInterface
+    {
+        return $this->logger;
+    }
+
+    public function run()
+    {
+        $this->load_sites_to_backup();
+        $this->convert_sites_to_applications();
+        $this->dump_databases();
     }
 
     protected function load_sites_to_backup()
@@ -81,13 +88,12 @@ class BackupAgent
         }
     }
 
-    protected function create_timestamp_for_file(\DateTime $dateTime = null) : string
+    /**
+     * @return NginxSite[]
+     */
+    public function getSites(): array
     {
-        if (!$dateTime) {
-            $dateTime = new \DateTime();
-        }
-
-        return $dateTime->format('Y-m-d-Y-H-i-s');
+        return $this->sites;
     }
 
     protected function dump_databases()
@@ -131,38 +137,35 @@ class BackupAgent
 
             $tar_object_compressed = new Archive_Tar($backup_file_path_abs, 'gz');
             if (!$tar_object_compressed->create([$backup_file_name_original])) {
-                throw new \Exception('Unable to make archive for some reason');
+                throw new Exception('Unable to make archive for some reason');
             }
 
             $app->add_backup('DB', $backup_file_path_abs);
         }
     }
 
-    public function run()
+    protected function create_timestamp_for_file(DateTime $dateTime = null): string
     {
-        $this->load_sites_to_backup();
-        $this->convert_sites_to_applications();
-        $this->dump_databases();
-    }
-
-    public function addLoggerSource(AbstractProcessingHandler  $handler)
-    {
-        $this->getLogger()->pushHandler($handler);
-    }
-
-    protected function createLogger()
-    {
-        if (!$this->logger) {
-            // create a log channel
-            $this->logger = new Logger('vendi-dev-backup');
+        if (!$dateTime) {
+            $dateTime = new DateTime();
         }
+
+        return $dateTime->format('Y-m-d-Y-H-i-s');
     }
 
     /**
-     * @return LoggerInterface
+     * @return WebApplicationInterface[]
      */
-    public function getLogger(): LoggerInterface
+    public function getApplications(): array
     {
-        return $this->logger;
+        return $this->applications;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStorageLocation(): string
+    {
+        return $this->storage_location;
     }
 }
