@@ -26,7 +26,7 @@ class PhpApplicationFigureOuter extends ServiceWithLogger
 
     public function get_application(): WebApplicationInterface
     {
-        $this->getLogger()->debug('Starting application detection', ['nginx-site' => $this->$this->nginxSite]);
+        $this->getLogger()->debug('Starting application detection', ['nginx-site' => $this->nginxSite]);
         $ret = $this->look_for_wordpress() ??
             $this->look_for_drupal() ??
             $this->look_for_default_site() ??
