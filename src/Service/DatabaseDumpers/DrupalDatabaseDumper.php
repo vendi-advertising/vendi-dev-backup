@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace Vendi\InternalTools\DevServerBackup\Service\DatabaseDumpers;
 
-class DrupalDatabaseDumper extends DatabaseDumperBase
+class DrupalDatabaseDumper extends AbstractDatabaseDumper
 {
     public function dump_database()
     {
+        // Depending on the drupal/drush version, the command for dumping might be
+        // sql:dump or sql-dump, so we need to get a version number first. This
+        // totally might be done in the wrong way, but so far it works.
         $command_outputs = [];
         $version_command = sprintf(
+            //Using --pipe gets us only the version number and nothing else
             'drush version --pipe --root=%1$s',
             escapeshellarg($this->getApplication()->getNginxSite()->get_folder_abs_path())
         );

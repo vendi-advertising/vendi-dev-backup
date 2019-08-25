@@ -6,7 +6,7 @@ namespace Vendi\InternalTools\DevServerBackup\Service;
 
 use Psr\Log\LoggerInterface;
 
-class NginxConfigDumper extends ServiceWithProcOpen
+class NginxConfigDumper extends AbstractServiceWithProcOpen
 {
     public function get_nginx_config(): string
     {

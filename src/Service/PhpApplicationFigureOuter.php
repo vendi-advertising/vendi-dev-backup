@@ -17,7 +17,7 @@ use Vendi\InternalTools\DevServerBackup\Service\ApplicationTesters\DrupalApplica
 use Vendi\InternalTools\DevServerBackup\Service\ApplicationTesters\WordPressApplicationTester;
 use Webmozart\PathUtil\Path;
 
-class PhpApplicationFigureOuter extends ServiceWithLogger
+class PhpApplicationFigureOuter extends AbstractServiceWithLogger
 {
     /**
      * @var NginxSite

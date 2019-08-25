@@ -4,7 +4,7 @@ namespace Vendi\InternalTools\DevServerBackup\Service;
 
 use Psr\Log\LoggerInterface;
 
-abstract class ServiceWithLogger
+abstract class AbstractServiceWithLogger
 {
     /**
      * @var LoggerInterface
@@ -19,7 +19,7 @@ abstract class ServiceWithLogger
     /**
      * @return LoggerInterface
      */
-    public function getLogger(): LoggerInterface
+    final public function getLogger(): LoggerInterface
     {
         return $this->logger;
     }

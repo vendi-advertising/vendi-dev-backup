@@ -5,9 +5,9 @@ namespace Vendi\InternalTools\DevServerBackup\Service\ApplicationTesters;
 use Psr\Log\LoggerInterface;
 use Vendi\InternalTools\DevServerBackup\Entity\NginxSite;
 use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\WebApplicationInterface;
-use Vendi\InternalTools\DevServerBackup\Service\ServiceWithLogger;
+use Vendi\InternalTools\DevServerBackup\Service\AbstractServiceWithLogger;
 
-abstract class ApplicationTesterBase  extends ServiceWithLogger implements ApplicationTesterInterface
+abstract class AbstractApplicationTester  extends AbstractServiceWithLogger implements ApplicationTesterInterface
 {
     /**
      * @var string

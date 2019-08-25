@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Vendi\InternalTools\DevServerBackup\Service\DatabaseDumpers;
 
-class WordPressDatabaseDumper extends DatabaseDumperBase
+class WordPressDatabaseDumper extends AbstractDatabaseDumper
 {
     public function dump_database()
     {

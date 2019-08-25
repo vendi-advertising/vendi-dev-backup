@@ -8,7 +8,7 @@ use Vendi\InternalTools\DevServerBackup\Entity\NginxSite;
 use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\WebApplicationInterface;
 use Vendi\InternalTools\DevServerBackup\Entity\WebApplications\WordPressApplication;
 
-class WordPressApplicationTester extends ApplicationTesterBase
+class WordPressApplicationTester extends AbstractApplicationTester
 {
     public function __construct(LoggerInterface $logger, NginxSite $nginxSite)
     {

@@ -27,7 +27,7 @@ class BackupAgent
     private $applications = [];
 
     /**
-     * @var LoggerInterface
+     * @var Logger
      */
     private $logger;
 
@@ -58,9 +58,9 @@ class BackupAgent
     }
 
     /**
-     * @return LoggerInterface
+     * @return Logger
      */
-    public function getLogger(): LoggerInterface
+    public function getLogger(): Logger
     {
         return $this->logger;
     }
@@ -110,11 +110,11 @@ class BackupAgent
 
             switch ($app->get_application_type()) {
                 case WebApplicationInterface::KNOWN_APPLICATION_TYPE_WORDPRESS:
-                    $dumper = new WordPressDatabaseDumper($app);
+                    $dumper = new WordPressDatabaseDumper($this->getLogger(), $app);
                     break;
 
                 case WebApplicationInterface::KNOWN_APPLICATION_TYPE_DRUPAL:
-                    $dumper = new DrupalDatabaseDumper($app);
+                    $dumper = new DrupalDatabaseDumper($this->getLogger(), $app);
                     break;
             }
 

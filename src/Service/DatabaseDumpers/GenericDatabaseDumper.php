@@ -6,7 +6,7 @@ namespace Vendi\InternalTools\DevServerBackup\Service\DatabaseDumpers;
 
 use Spatie\DbDumper\Databases\MySql;
 
-class GenericDatabaseDumper extends DatabaseDumperBase
+class GenericDatabaseDumper extends AbstractDatabaseDumper
 {
     public function dump_database()
     {

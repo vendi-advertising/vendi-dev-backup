@@ -6,7 +6,7 @@ namespace Vendi\InternalTools\DevServerBackup\Service;
 
 use Vendi\InternalTools\DevServerBackup\Entity\NginxSite;
 
-class NginxSiteParser extends ServiceWithLogger
+class NginxSiteParser extends AbstractServiceWithLogger
 {
     /**
      * @param string $stdout

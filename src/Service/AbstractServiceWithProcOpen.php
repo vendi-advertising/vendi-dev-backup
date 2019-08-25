@@ -14,19 +14,19 @@ use function stream_get_contents;
 use function sys_get_temp_dir;
 use function tempnam;
 
-abstract class ServiceWithProcOpen extends ServiceWithLogger
+abstract class AbstractServiceWithProcOpen extends AbstractServiceWithLogger
 {
     /**
      * @var int
      */
     private $timeoutInSeconds = 120;
 
-    protected function create_tmp_file(): string
+    final protected function create_tmp_file(): string
     {
         return tempnam(sys_get_temp_dir(), 'VENDI_BACKUP');
     }
 
-    protected function run_command($properly_escaped_command, &$command_outputs = null): bool
+    final protected function run_command($properly_escaped_command, &$command_outputs = null): bool
     {
         //Default to an empty array to erase anything coming in
         $command_outputs = [];
@@ -108,7 +108,7 @@ abstract class ServiceWithProcOpen extends ServiceWithLogger
     /**
      * @return int
      */
-    public function getTimeoutInSeconds(): int
+    final public function getTimeoutInSeconds(): int
     {
         return $this->timeoutInSeconds;
     }
