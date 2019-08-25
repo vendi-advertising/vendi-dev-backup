@@ -51,7 +51,7 @@ class BackupAgent
 //        $this->addLoggerSource(new StreamHandler('path/to/your.log', Logger::DEBUG));
         $this->addLoggerSource(new SyslogHandler('vendi-dev-backup', LOG_USER, Logger::WARNING));
         $this->timestamp = $this->create_timestamp_for_file();
-        $this->ba = $backupMode;
+        $this->backupMode = $backupMode;
     }
 
     protected function createLogger()
