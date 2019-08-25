@@ -89,13 +89,13 @@ class BackupAgent
         $this->load_sites_to_backup();
         $this->convert_sites_to_applications();
 
-        if(self::BACKUP_MODE_DATABASE === $this->getBackupMode() & self::BACKUP_MODE_DATABASE){
+        if(self::BACKUP_MODE_DATABASE === ($this->getBackupMode() & self::BACKUP_MODE_DATABASE)){
             $this->backup_databases();
         }else{
             $this->getLogger()->info('Database backup flagged to not run');
         }
 
-        if(self::BACKUP_MODE_FILE_SYSTEM === $this->getBackupMode() & self::BACKUP_MODE_FILE_SYSTEM){
+        if(self::BACKUP_MODE_FILE_SYSTEM === ($this->getBackupMode() & self::BACKUP_MODE_FILE_SYSTEM)){
             $this->backup_sites();
         }else{
             $this->getLogger()->info('File system backup flagged to not run');
