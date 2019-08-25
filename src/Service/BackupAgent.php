@@ -22,9 +22,15 @@ use const LOG_USER;
 
 class BackupAgent
 {
+    public const BACKUP_MODE_DATABASE = 2;
+    public const BACKUP_MODE_FILE_SYSTEM = 4;
+    public const BACKUP_MODE_ALL = 6;
+
     private $sites = [];
 
     private $applications = [];
+
+    private $timestamp;
 
     /**
      * @var Logger
@@ -36,12 +42,16 @@ class BackupAgent
      */
     private $storage_location;
 
-    public function __construct(string $storage_location)
+    private $backupMode;
+
+    public function __construct(string $storage_location, int $backupMode = self::BACKUP_MODE_ALL)
     {
         $this->storage_location = $storage_location;
         $this->createLogger();
-        $this->addLoggerSource(new StreamHandler('path/to/your.log', Logger::DEBUG));
+//        $this->addLoggerSource(new StreamHandler('path/to/your.log', Logger::DEBUG));
         $this->addLoggerSource(new SyslogHandler('vendi-dev-backup', LOG_USER, Logger::WARNING));
+        $this->timestamp = $this->create_timestamp_for_file();
+        $this->ba = $backupMode;
     }
 
     protected function createLogger()
@@ -65,11 +75,31 @@ class BackupAgent
         return $this->logger;
     }
 
+    protected function create_timestamp_for_file(DateTime $dateTime = null): string
+    {
+        if (!$dateTime) {
+            $dateTime = new DateTime();
+        }
+
+        return $dateTime->format('Y-m-d-Y-H-i-s');
+    }
+
     public function run()
     {
         $this->load_sites_to_backup();
         $this->convert_sites_to_applications();
-        $this->dump_databases();
+
+        if(self::BACKUP_MODE_DATABASE === $this->getBackupMode() & self::BACKUP_MODE_DATABASE){
+            $this->backup_databases();
+        }else{
+            $this->getLogger()->info('Database backup flagged to not run');
+        }
+
+        if(self::BACKUP_MODE_FILE_SYSTEM === $this->getBackupMode() & self::BACKUP_MODE_FILE_SYSTEM){
+            $this->backup_sites();
+        }else{
+            $this->getLogger()->info('File system backup flagged to not run');
+        }
     }
 
     protected function load_sites_to_backup()
@@ -96,12 +126,16 @@ class BackupAgent
         return $this->sites;
     }
 
-    protected function dump_databases()
+    protected function backup_databases()
     {
-        $timestamp = $this->create_timestamp_for_file();
-
+        $this->getLogger()->info('Beginning database backup process');
         foreach ($this->getApplications() as $app) {
+            if ($app->exclude_from_backup()) {
+                $this->getLogger()->info('Application is flagged as excluded from backup', ['application' => $app]);
+                continue;
+            }
             if (!$app->has_database()) {
+                $this->getLogger()->info('Application does not have a database', ['application' => $app]);
                 continue;
             }
 
@@ -119,6 +153,7 @@ class BackupAgent
             }
 
             if (!$dumper) {
+                $this->getLogger()->warn('Application does not have a known database backup format', ['application' => $app]);
                 continue;
             }
 
@@ -126,7 +161,7 @@ class BackupAgent
 
             $backup_file_name = sprintf(
                 '%1$s.%2$s.sql.tgz',
-                $timestamp,
+                $this->getTimestamp(),
                 $app->get_nginx_site()->get_project_name()
             );
 
@@ -142,15 +177,7 @@ class BackupAgent
 
             $app->add_backup('DB', $backup_file_path_abs);
         }
-    }
-
-    protected function create_timestamp_for_file(DateTime $dateTime = null): string
-    {
-        if (!$dateTime) {
-            $dateTime = new DateTime();
-        }
-
-        return $dateTime->format('Y-m-d-Y-H-i-s');
+        $this->getLogger()->info('Database backup process complete');
     }
 
     /**
@@ -164,8 +191,53 @@ class BackupAgent
     /**
      * @return string
      */
+    public function getTimestamp(): string
+    {
+        return $this->timestamp;
+    }
+
+    /**
+     * @return string
+     */
     public function getStorageLocation(): string
     {
         return $this->storage_location;
+    }
+
+    protected function backup_sites()
+    {
+        $this->getLogger()->info('Beginning folder backup process');
+        foreach ($this->getApplications() as $app) {
+            if ($app->exclude_from_backup()) {
+                $this->getLogger()->info('Application is flagged as excluded from backup', ['application' => $app]);
+                continue;
+            }
+            $backup_file_name = sprintf(
+                '%1$s.%2$s.site.tgz',
+                $this->getTimestamp(),
+                $app->get_nginx_site()->get_project_name()
+            );
+
+            $backup_file_path_abs = Path::join($this->getStorageLocation(), $backup_file_name);
+            if (is_file($backup_file_path_abs)) {
+                unlink($backup_file_path_abs);
+            }
+
+            $tar_object_compressed = new Archive_Tar($backup_file_path_abs, 'gz');
+            if (!$tar_object_compressed->create([$app->get_nginx_site()->get_folder_abs_path()])) {
+                throw new Exception('Unable to make archive for some reason');
+            }
+
+            $app->add_backup('FS', $backup_file_path_abs);
+        }
+        $this->getLogger()->info('Folder backup process complete');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBackupMode()
+    {
+        return $this->backupMode;
     }
 }

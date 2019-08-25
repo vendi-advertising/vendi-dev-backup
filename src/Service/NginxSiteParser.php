@@ -44,7 +44,7 @@ class NginxSiteParser extends AbstractServiceWithLogger
             array_shift($folder_parts);
             $project_name = array_shift($folder_parts);
 
-            $this->getLogger()->info('Found nginx site', ['project_name' => $project_name, '$folder_abs_path' => $folder_abs_path]);
+            $this->getLogger()->info('Found nginx site', ['project_name' => $project_name, 'folder_abs_path' => $folder_abs_path]);
 
             $ret[] = new NginxSite($project_name, $folder_abs_path);
         }
